@@ -36,5 +36,5 @@ struct tdx_blob
 
 
 ** For the current first release, the <version> field is defined to be 1.0 (0x100).
-** For the current first release, the <N> is equal to zero.
+** For the current first release, the <N> is equal to one.
 ** All reserved fields must be set to zero.
