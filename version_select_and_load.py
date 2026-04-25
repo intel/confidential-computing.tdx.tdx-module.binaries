@@ -40,6 +40,7 @@ except ImportError:
 
 FIRMWARE_PATH = "/sys/class/firmware/seamldr_upload"
 MODULE_PATH = "/sys/devices/faux/tdx_host"
+CPU_PATH = "/sys/devices/system/cpu"
 SEAMLDR_PATH = "/sys/devices/faux/tdx_host/seamldr"
 allow_debug = False
 
@@ -86,6 +87,36 @@ def get_current_seamldr_version() -> str:
     except Exception as e:
         print(f"Error reading current seamldr version: {e}")
         return None
+
+def get_num_remaining_updates() -> int:
+    """Read the remaining update count from sysfs.
+
+    Returns:
+        int: The remaining update count or None if an error occurs.
+    """
+    try:
+        with open(os.path.join(MODULE_PATH, "num_remaining_updates"), "r") as f:
+            num_remaining_updates = int(f.read().strip())
+        return num_remaining_updates
+    except Exception as e:
+        print(f"Error reading num_remaining_updates: {e}")
+        return None
+
+def are_all_cpus_online() -> bool:
+    """Check if all CPUs are online.
+
+    Returns:
+        bool: True if all CPUs are online, False otherwise.
+    """
+    try:
+        with open(os.path.join(CPU_PATH, "online"), "r") as f:
+            online_cpus = f.read().strip()
+        with open(os.path.join(CPU_PATH, "present"), "r") as f:
+            present_cpus = f.read().strip()
+        return online_cpus == present_cpus
+    except Exception as e:
+        print(f"Error checking CPU online state: {e}")
+        return False
 
 def get_supported_cpu_family_model(blob_path: str) -> list[int]:
     """Determine the supported CPU family models for the module.
@@ -358,6 +389,15 @@ def update_tdx_module(module: TdxModule) -> None:
         print(f"Error: {FIRMWARE_PATH} does not exist.")
         sys.exit(1)
 
+    if not are_all_cpus_online():
+        print("Not all CPUs are online. Skipping update.")
+        return
+
+    num_remaining_updates = get_num_remaining_updates()
+    if not num_remaining_updates:
+        print("No remaining Intel TDX module updates available. Skipping update.")
+        return
+    
     prev_version = get_current_module_version()
     print(f"Install module {module.path}")
 
