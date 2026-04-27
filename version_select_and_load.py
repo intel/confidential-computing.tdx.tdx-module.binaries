@@ -38,10 +38,9 @@ except ImportError:
     print("Error: cpuid module is not installed. Please install it using 'pip install cpuid'")
     sys.exit(1)
 
-FIRMWARE_PATH = "/sys/class/firmware/seamldr_upload"
+FIRMWARE_PATH = "/sys/class/firmware/tdx_module"
 MODULE_PATH = "/sys/devices/faux/tdx_host"
 CPU_PATH = "/sys/devices/system/cpu"
-SEAMLDR_PATH = "/sys/devices/faux/tdx_host/seamldr"
 allow_debug = False
 
 # Default directory of the module blobs
@@ -81,7 +80,7 @@ def get_current_seamldr_version() -> str:
         str: The current seamldr version or None if an error occurs.
     """
     try:
-        with open(os.path.join(SEAMLDR_PATH, "version"), "r") as f:
+        with open(os.path.join(MODULE_PATH, "seamldr_version"), "r") as f:
             version = f.read().strip()
         return version
     except Exception as e:
