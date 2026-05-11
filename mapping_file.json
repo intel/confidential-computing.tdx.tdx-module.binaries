@@ -56,13 +56,13 @@
 		{
 			"version": "1.5.24",
 			"min_module_version_for_td_preserving": "1.5.01",
-			"min_seamldr_versions": [ "1.5.00", "2.0.00" ],
+			"min_seamldr_versions": [ "1.5.00" ],
 			"tdx_feature0": "0xD1326F3F0FBF"
 		},
 		{
 			"version": "1.5.25",
 			"min_module_version_for_td_preserving": "1.5.01",
-			"min_seamldr_versions": [ "1.5.00", "2.0.00" ],
+			"min_seamldr_versions": [ "2.0.00" ],
 			"tdx_feature0": "0xD1326F3F0FBF"
 		},
 		{
