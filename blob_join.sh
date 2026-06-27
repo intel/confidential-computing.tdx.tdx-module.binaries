@@ -64,6 +64,15 @@ if [ "$sigstruct_size" -ne 2048 ]; then
     exit 1
 fi
 
+module_length=$(stat -c%s "$bin_file")
+module_nr_pages=$(( (module_length + 4095) / 4096 ))
+sigstruct_nr_pages=1
+sigstruct_padded_size=$((sigstruct_nr_pages * 4096))
+sigstruct_pad_bytes=$((sigstruct_padded_size - sigstruct_size))
+
+module_nr_pages_bytes=$(printf '%08x' "$module_nr_pages" | sed 's/\(..\)\(..\)\(..\)\(..\)/\\x\4\\x\3\\x\2\\x\1/')
+sigstruct_nr_pages_bytes=$(printf '%08x' "$sigstruct_nr_pages" | sed 's/\(..\)\(..\)\(..\)\(..\)/\\x\4\\x\3\\x\2\\x\1/')
+
 # Create output directory
 output_dir="./joined_files/${version_major}.${version_minor}/"
 mkdir -p "$output_dir"
@@ -71,44 +80,24 @@ mkdir -p "$output_dir"
 # Create output file name
 output_file="${output_dir}tdx_module_${version_major}.${version_minor}.${version_update}.blob"
 
-# Write header to blob file
+# Write 4KB header (tdx_blob format version 0x200)
 {
-    printf '\x00\x01' # Version field (little-endian)
+    printf '\x00\x02' # Version field (little-endian, 2.0 / 0x200)
     printf '\x00\x00' # Checksum placeholder
-    printf '\x00\x20\x00\x00' # Offset of module
     printf 'TDX-BLOB' # Signature
-    printf '\x00\x00\x00\x00' # Length placeholder
-    printf '\x00\x00\x00\x00' # resv0
-    for ((i=0; i<509; i++)); do
-        printf '\x00\x00\x00\x00\x00\x00\x00\x00' # resv1[509]
-    done
+    echo -en "$sigstruct_nr_pages_bytes"
+    echo -en "$module_nr_pages_bytes"
+    dd if=/dev/zero bs=1 count=4076 status=none
 } > "$output_file"
 
-# Append sigstruct to blob file
-cat "$sigstruct_file" >> "$output_file"
-
-# Append reserved fields and module to blob file
+# Append sigstruct region (4KB aligned, zero-padded)
 {
-    for ((i=0; i<256; i++)); do
-        printf '\x00\x00\x00\x00\x00\x00\x00\x00' # resv2[256]
-    done
-    cat "$bin_file" # Module
+    cat "$sigstruct_file"
+    dd if=/dev/zero bs=1 count="$sigstruct_pad_bytes" status=none
 } >> "$output_file"
 
-# Calculate offset and length
-module_offset=$((8192)) # 8KB
-module_length=$(stat -c%s "$bin_file")
-blob_length=$((module_offset + module_length))
-
-# Ensure blob_length is a valid integer
-if ! [[ "$blob_length" =~ ^[0-9]+$ ]]; then
-    echo "Error: Blob length is not a valid integer."
-    exit 1
-fi
-
-# Update length field (little-endian)
-length_bytes=$(printf '%08x' "$blob_length" | sed 's/\(..\)\(..\)\(..\)\(..\)/\\x\4\\x\3\\x\2\\x\1/')
-echo -e "$length_bytes" | dd of="$output_file" bs=1 seek=16 count=4 conv=notrunc
+# Append module binary
+cat "$bin_file" >> "$output_file"
 
 echo "Calculating checksum..."
 
@@ -130,6 +119,6 @@ checksum_result=$(( (0x10000 - checksum_actual) & 0xFFFF ))
 
 # Update the checksum field in the blob (little-endian)
 checksum_bytes=$(printf '%04x' "$checksum_result" | sed 's/\(..\)\(..\)/\\x\2\\x\1/')
-echo -e "$checksum_bytes" | dd of="$output_file" bs=1 seek=2 count=2 conv=notrunc
+echo -e "$checksum_bytes" | dd of="$output_file" bs=1 seek=2 count=2 conv=notrunc status=none
 
 echo "Blob file created successfully: $output_file"

@@ -24,17 +24,17 @@ struct tdx_blob
 {
 	_u16 version;              // Version number
 	_u16 checksum;             // Checksum of the entire blob should be zero
-	_u32 offset_of_module;     // Offset of the module binary intel_tdx_module.bin in bytes
 	_u8  signature[8];         // Must be "TDX-BLOB"
-	_u32 length;               // The length in bytes of the entire blob
-	_u32 reserved0;            // Reserved space
-	_u64 reserved1[509];       // Reserved space
-	_u8  sigstruct[N*4096];    // intel_tdx_module.so.sigstruct, 4KB aligned, zero-padded
-	                           // offset_of_module = 4KB + (N * 4KB). N>=1
-	_u8  module[];             // intel_tdx_module.bin, 4KB aligned, to the end of the file
+	_u32 sigstruct_nr_pages;   // Number of 4KB pages occupied by sigstruct data
+	_u32 module_nr_pages;      // Number of 4KB pages occupied by module data
+	_u8  reserved[4076];       // Reserved space to pad the header to 4KB
+	_u8  sigstruct[];          // intel_tdx_module.so.sigstruct, 4KB aligned, zero-padded
+	_u8  module[];             // intel_tdx_module.bin, 4KB aligned
 }
 
 
-** For the current first release, the <version> field is defined to be 1.0 (0x100).
-** For the current first release, the <N> is equal to one.
+** The <version> field is defined to be 2.0 (0x200).
+** For sigstruct files that are 2KB, <sigstruct_nr_pages> is equal to one.
+** <module_nr_pages> is the number of 4KB pages required to hold the module binary
+** (i.e. ceil(module_size / 4096)).
 ** All reserved fields must be set to zero.
