@@ -66,6 +66,18 @@
 			"tdx_feature0": "0xD1326F3F0FBF"
 		},
 		{
+			"version": "1.5.28",
+			"min_module_version_for_td_preserving": "1.5.01",
+			"min_seamldr_versions": [ "1.5.00", "2.0.00" ],
+			"tdx_feature0": "0x18D1326F3F0FBF"
+		},
+		{
+			"version": "1.5.34",
+			"min_module_version_for_td_preserving": "1.5.01",
+			"min_seamldr_versions": [ "1.5.00", "2.0.00" ],
+			"tdx_feature0": "0x158D1326F3F1FBF"
+		},
+		{
 			"version": "2.0.02",
 			"min_module_version_for_td_preserving": "2.0.02",
 			"min_seamldr_versions": [ "2.0.00" ],
@@ -100,6 +112,18 @@
 			"min_module_version_for_td_preserving": "2.0.04",
 			"min_seamldr_versions": [ "2.0.00" ],
 			"tdx_feature0": "0xD132A71F0FBF"
+		},
+		{
+			"version": "2.0.16",
+			"min_module_version_for_td_preserving": "2.0.04",
+			"min_seamldr_versions": [ "2.0.00" ],
+			"tdx_feature0": "0x18D132A71F0FBF"
+		},
+		{
+			"version": "2.0.18",
+			"min_module_version_for_td_preserving": "2.0.04",
+			"min_seamldr_versions": [ "2.0.00" ],
+			"tdx_feature0": "0x158D132A71F1FBF"
 		}
 	]
 }
