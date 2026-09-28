@@ -88,12 +88,16 @@ The `version_select_and_load.py` must work with WIP kernel interfaces to support
   | 1.5.20                         | 1.5.01                                               | 1.5.00, 2.0.00                      |
   | 1.5.24                         | 1.5.01                                               | 1.5.00                              |
   | 1.5.25                         | 1.5.01                                               | 2.0.00                              |
+  | 1.5.28                         | 1.5.01                                               | 1.5.00, 2.0.00                      |
+  | 1.5.34                         | 1.5.01                                               | 1.5.00, 2.0.00                      |
   | 2.0.02                         | 2.0.02                                               | 2.0.00                              |
   | 2.0.04                         | 2.0.04                                               | 2.0.00                              |
   | 2.0.05                         | 2.0.04                                               | 2.0.00                              |
   | 2.0.08                         | 2.0.04                                               | 2.0.00                              |
   | 2.0.12                         | 2.0.04                                               | 2.0.00                              |
   | 2.0.14                         | 2.0.04                                               | 2.0.00                              |
+  | 2.0.16                         | 2.0.04                                               | 2.0.00                              |
+  | 2.0.18                         | 2.0.04                                               | 2.0.00                              |
 
 - Intel TDX module 2.0 versions include pre-production Connect interfaces and are currently not supported.
 - Performing TD Preserving during a TD Build operation might result in a corrupted TD hash in the TD attestation report. This issue affects all Intel TDX module versions prior to 1.5.24 and 2.0.14, respectively. Starting with versions 1.5.24 and 2.0.14, the Update Compatibility feature is supported, which, if opted in, prevents the TD Preserving issues during TD Build. For earlier versions, a host VMM can avoid the problem by not conducting a TD Preserving Update while a TD Build operation is in progress.

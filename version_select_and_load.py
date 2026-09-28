@@ -46,6 +46,42 @@ allow_debug = False
 # Default directory of the module blobs
 DEFAULT_MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+def verify_blob_checksum(blob_path: str) -> bool:
+    """Verify the blob checksum by summing all 16-bit words.
+
+    The TDX blob format includes a checksum field at offset 2-3.
+    The checksum is calculated such that when all 16-bit little-endian
+    words in the entire blob are summed, the result should be zero.
+
+    Args:
+        blob_path (str): Path to the module blob file.
+
+    Returns:
+        bool: True if checksum is valid (sum is zero), False otherwise.
+    """
+    try:
+        with open(blob_path, "rb") as f:
+            data = f.read()
+
+        # Pad to even length if necessary
+        if len(data) % 2 != 0:
+            data += b'\x00'
+
+        # Sum all 16-bit little-endian words
+        checksum = 0
+        for i in range(0, len(data), 2):
+            word = struct.unpack("<H", data[i:i+2])[0]
+            checksum = (checksum + word) & 0xFFFF
+
+        if checksum != 0:
+            print(f"Checksum verification failed for {blob_path}: sum={checksum:#06x}")
+            return False
+
+        return True
+    except Exception as e:
+        print(f"Error verifying checksum: {e}")
+        return False
+
 def get_cpuid_1_eax() -> int:
     """Get the current CPU's CPUID.1.EAX value on Linux.
 
@@ -395,6 +431,11 @@ def update_tdx_module(module: TdxModule) -> None:
     num_remaining_updates = get_num_remaining_updates()
     if not num_remaining_updates:
         print("No remaining Intel TDX module updates available. Skipping update.")
+        return
+
+    # Verify blob checksum before loading
+    if not verify_blob_checksum(module.path):
+        print(f"Blob checksum verification failed for {module.version}. Aborting update.")
         return
     
     prev_version = get_current_module_version()
